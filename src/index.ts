@@ -1,7 +1,8 @@
 import express, { Express } from 'express';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
-import { addReading } from './repository';
+import { verifyQueryString, jsonErrorHandler } from './middleware'
+import { addReading, getReadings } from './repository'
 
 // -----
 // SETUP
@@ -37,11 +38,25 @@ app.post('/data', async (req, res) => {
 })
 
 // TODO: check what dates have been requested, and retrieve all data within the given range
-app.get('/data', async (req, res) => {
+app.get('/data', verifyQueryString, async (req, res) => {
+	try {
+		const from = new Date(Date.parse(req.query.from as string))
+		const to = new Date(Date.parse(req.query.to as string))
 
-	// getReading(...)
+		if(from > to) throw new Error('Invalid date range')
 
-	return res.json({ success: false });
-});
+		const readings = getReadings(from, to)
 
+		return res.json(readings)
+	}
+	catch(err: unknown) {
+		const error = err as Error
+
+		console.error(error.message)
+		return res.json({ success: false })
+	}
+})
+
+// error handling from middleware
+app.use(jsonErrorHandler)
 app.listen(PORT, () => console.log(`Running on port ${PORT} ⚡`));

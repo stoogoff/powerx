@@ -1,5 +1,5 @@
 
-import { isInt, isDecimal } from './utils/number'
+import { isInt, isDecimal } from './utils/validators'
 
 // valid type values
 export enum TypeValues {
@@ -19,6 +19,18 @@ export class Reading {
 		this.value = value
 	}
 
+	get date(): Date {
+		return new Date(this.timestamp * 1000)
+	}
+
+	toJson(): any {
+		return {
+			timestamp: this.date.toISOString(),
+			type: this.type,
+			value: this.value,
+		}
+	}
+
 	static parse(input: string): Reading {
 		const [timestamp, type, value] = input.split(' ')
 
@@ -35,4 +47,10 @@ export class Reading {
 
 		return new Reading(parseInt(timestamp), type, parseFloat(value))
 	}
+}
+
+// output class for readings
+export interface ReadingsResponse {
+	readings: Reading[]
+	daily: Reading[]
 }

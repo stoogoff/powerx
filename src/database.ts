@@ -6,4 +6,8 @@ export class Database<T> {
     this.records.push(record)
     return record
   }
+
+  allRecords(): T[] {
+    return this.records
+  }
 }
