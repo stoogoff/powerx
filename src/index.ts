@@ -1,8 +1,10 @@
 import express, { Express } from 'express';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
-import { addReading, getReading } from './database';
+import { addReading } from './repository';
 
+// -----
+// SETUP
 dotenv.config();
 
 const PORT = process.env.PORT || 3000;
@@ -12,22 +14,34 @@ app.use(helmet());
 app.use(express.text());
 app.use(express.urlencoded({ extended: true }));
 
+// ----------
+// END POINTS
+
+// parse incoming data, and save it to the database
+// data is of the form:
+//  {timestamp} {name} {value}
 app.post('/data', async (req, res) => {
-  // TODO: parse incoming data, and save it to the database
-  // data is of the form:
-  //  {timestamp} {name} {value}
+	try {
+		const input = req.body.split('\n')
 
-  // addReading(...)
+		input.forEach((reading: string) => addReading(reading))
 
-  return res.json({ success: false });
-});
+		res.json({ success: true })
+	}
+	catch(err: unknown) {
+		const error = err as Error
 
+		console.error(error.message)
+		return res.json({ success: false })
+	}
+})
+
+// TODO: check what dates have been requested, and retrieve all data within the given range
 app.get('/data', async (req, res) => {
-  // TODO: check what dates have been requested, and retrieve all data within the given range
 
-  // getReading(...)
+	// getReading(...)
 
-  return res.json({ success: false });
+	return res.json({ success: false });
 });
 
 app.listen(PORT, () => console.log(`Running on port ${PORT} ⚡`));
